@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -211,13 +213,13 @@ public class AdministratorService {
 	}
 
 	@RequestMapping(value = "/deleteBranch", method = RequestMethod.DELETE, consumes = "application/json")
-	public Branch deleteBranch(@RequestBody Branch branch) {
+	public ResponseEntity<?> deleteBranch(@RequestBody Branch branch) {
 		try {
 			branchRepo.delete(branch);
-			return branch;
+			return new ResponseEntity<>(branch, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return branch;
+			return new ResponseEntity<>("Failed to delete branch.", HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -229,39 +231,47 @@ public class AdministratorService {
 	}
 
 	@RequestMapping(value = "/addBorrower", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Borrower addBorrower(@RequestBody Borrower borrower) {
-			return borrowerRepo.save(borrower);
+	public ResponseEntity<?> addBorrower(@RequestBody Borrower borrower) {
+		try {
+			borrowerRepo.save(borrower);
+			return new ResponseEntity<>(borrower, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Failed to add borrower", HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@RequestMapping(value = "/updateBorrower", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Borrower updateBorrower(@RequestBody Borrower borrower) {
-		if (borrowerRepo.existsById(borrower.getCardNo())) {
-			Borrower updatedBorrower = borrowerRepo.getOne(borrower.getCardNo());
-			if (borrower.getName() != null) {
-				updatedBorrower.setName(borrower.getName());
+	public ResponseEntity<?> updateBorrower(@RequestBody Borrower borrower) {
+		try {
+			if (borrowerRepo.existsById(borrower.getCardNo())) {
+				Borrower updatedBorrower = borrowerRepo.findById(borrower.getCardNo()).get();
+				if (borrower.getName() != null) {
+					updatedBorrower.setName(borrower.getName());
+				}
+				if (borrower.getAddress() != null) {
+					updatedBorrower.setAddress(borrower.getAddress());
+				}
+				if (borrower.getPhone() != null) {
+					updatedBorrower.setPhone(borrower.getPhone());
+				}
+				return new ResponseEntity<>(borrowerRepo.save(updatedBorrower), HttpStatus.OK);
 			}
-	
-			if (borrower.getAddress() != null) {
-				updatedBorrower.setAddress(borrower.getAddress());
-			}
-
-			if (borrower.getPhone() != null) {
-				updatedBorrower.setPhone(borrower.getPhone());
-			}
-			
-			return borrowerRepo.save(updatedBorrower);
+			return new ResponseEntity<>("Could not locate borrower", HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Error: unable to update borrower", HttpStatus.BAD_REQUEST);
 		}
-		return null;
 	}
 
 	@RequestMapping(value = "/deleteBorrower", method = RequestMethod.DELETE, consumes = "application/json")
-	public Borrower deleteBorrower(@RequestBody Borrower borrower) {
+	public ResponseEntity<?> deleteBorrower(@RequestBody Borrower borrower) {
 		try {
 			borrowerRepo.delete(borrower);
-			return borrower;
+			return new ResponseEntity<>(borrower, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return borrower;
+			return new ResponseEntity<>("Failed to delete borrower.", HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -272,29 +282,31 @@ public class AdministratorService {
 		return borrowers;
 	}	
 
-
 	@RequestMapping(value = "/overrideDueDate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Loan overrideDueDate(@RequestBody OverrideDueDateRequest overrideDueDateRequest) {
+	public ResponseEntity<?> overrideDueDate(@RequestBody OverrideDueDateRequest overrideDueDateRequest) {
 		Branch branch = overrideDueDateRequest.getBranch();
 		Book book = overrideDueDateRequest.getBook();
 		Integer cardNo = overrideDueDateRequest.getCardNo();
 		Integer numDaysToExtend = overrideDueDateRequest.getNumDaysToExtend();
 
-		List<Loan> loans = branchRepo.getDueDate(branch.getBranchId(), book.getBookId(), cardNo);
-		Loan loan = loans.get(0);
-
-		Date date = new Date(loan.getDueDate().getTime());
-    Calendar c = Calendar.getInstance();
-    c.setTime(date);
-    c.add(Calendar.DATE, numDaysToExtend);
-    Date due = c.getTime();
-
-		Timestamp dueDate = new Timestamp(due.getTime());
-		loan.setDueDate(dueDate);
-
-		branchRepo.overrideDueDate(branch.getBranchId(), book.getBookId(), cardNo, dueDate);
-
-		return loan;
+		try {
+			List<Loan> loans = branchRepo.getDueDate(branch.getBranchId(), book.getBookId(), cardNo);
+			Loan loan = loans.get(0);
+	
+			Date date = new Date(loan.getDueDate().getTime());
+			Calendar c = Calendar.getInstance();
+			c.setTime(date);
+			c.add(Calendar.DATE, numDaysToExtend);
+			Date due = c.getTime();
+	
+			Timestamp dueDate = new Timestamp(due.getTime());
+			loan.setDueDate(dueDate);
+			branchRepo.overrideDueDate(branch.getBranchId(), book.getBookId(), cardNo, dueDate);
+			return new ResponseEntity<>(loan, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Failed to override due date", HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 }
