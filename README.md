@@ -55,3 +55,52 @@ port 8080
 ### /getNoOfCopies?branchId={branchId}&bookId={bookId}
 
 - GET
+
+# Admin Service
+
+port 8080
+
+- - - -
+
+### /overrideDueDate
+
+- POST
+
+#### Request body:
+
+```
+{
+  "branch": {
+    "branchId": {branchId}
+  }, 
+  "book": {
+    "bookId": {bookId}
+  },
+  "cardNo": {cardNo},
+  "numDaysToExtend": {numDaysToExtend},
+}
+```
+
+- - - -
+
+### /
+
+- 
+
+- - - -
+
+### /
+
+- 
+
+- - - -
+
+### /
+
+- 
+
+- - - -
+
+### /
+
+- 
