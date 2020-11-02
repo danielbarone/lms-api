@@ -52,6 +52,6 @@ port 8080
 
 - - - -
 
-### /getNoOfCopies?branchId{branchId}&bookId={bookId}
+### /getNoOfCopies?branchId={branchId}&bookId={bookId}
 
 - GET
