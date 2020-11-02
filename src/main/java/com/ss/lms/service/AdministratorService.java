@@ -81,26 +81,38 @@ public class AdministratorService {
 	PublisherRepo prepo;
 	
 	@RequestMapping(value = "/addBook", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Book addBook(@RequestBody Book book) {
-			return brepo.save(book);
+	public ResponseEntity<?> addBook(@RequestBody Book book) {
+		try {
+			brepo.save(book);
+			return new ResponseEntity<>(book, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Failed to add book", HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@RequestMapping(value = "/updateBook", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Book updateBook(@RequestBody Book book) {
-		if (brepo.existsById(book.getBookId())) {
-			return brepo.save(book);
+	public ResponseEntity<?> updateBook(@RequestBody Book book) {
+		try {
+			if (brepo.existsById(book.getBookId())) {
+				brepo.save(book);
+				return new ResponseEntity<>(book, HttpStatus.OK);
+			}
+			return new ResponseEntity<>("Could not locate book", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Failed to update book.", HttpStatus.BAD_REQUEST);
 		}
-		return null;
 	}
 
 	@RequestMapping(value = "/deleteBook", method = RequestMethod.DELETE, consumes = "application/json")
-	public Book deleteBook(@RequestBody Book book) {
+	public ResponseEntity<?> deleteBook(@RequestBody Book book) {
 		try {
 			brepo.delete(book);
-			return book;
+			return new ResponseEntity<>(book, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return book;
+			return new ResponseEntity<>("Failed to delete book", HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -116,26 +128,38 @@ public class AdministratorService {
 	}
 
 	@RequestMapping(value = "/addGenre", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Genre addGenre(@RequestBody Genre genre) {
-			return grepo.save(genre);
+	public ResponseEntity<?> addGenre(@RequestBody Genre genre) {
+		try {
+			grepo.save(genre);
+			return new ResponseEntity<>(genre, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Failed to add genre", HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@RequestMapping(value = "/updateGenre", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Genre updateGenre(@RequestBody Genre genre) {
-		if (grepo.existsById(genre.getGenreId())) {
-			return grepo.save(genre);
+	public ResponseEntity<?> updateGenre(@RequestBody Genre genre) {
+		try {
+			if (grepo.existsById(genre.getGenreId())) {
+				grepo.save(genre);
+				return new ResponseEntity<>(genre, HttpStatus.OK);
+			}
+			return new ResponseEntity<>("Could not locate genre", HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Failed to update genre", HttpStatus.BAD_REQUEST);
 		}
-		return null;
 	}
 
 	@RequestMapping(value = "/deleteGenre", method = RequestMethod.DELETE, consumes = "application/json")
-	public Genre deleteGenre(@RequestBody Genre genre) {
+	public ResponseEntity<?> deleteGenre(@RequestBody Genre genre) {
 		try {
 			grepo.delete(genre);
-			return genre;
+			return new ResponseEntity<>(genre, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return genre;
+			return new ResponseEntity<>("Failed to delete genre", HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -147,39 +171,51 @@ public class AdministratorService {
 	}
 
 	@RequestMapping(value = "/addPublisher", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Publisher addPublisher(@RequestBody Publisher publisher) {
-			return prepo.save(publisher);
+	public ResponseEntity<?> addPublisher(@RequestBody Publisher publisher) {
+		try {
+			prepo.save(publisher);
+			return new ResponseEntity<>(publisher, HttpStatus.OK); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Failed to add publisher", HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@RequestMapping(value = "/updatePublisher", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Publisher updatePublisher(@RequestBody Publisher publisher) {
-		if (prepo.existsById(publisher.getPublisherId())) {
-			Publisher updatedPublisher = prepo.getOne(publisher.getPublisherId());
-			if (publisher.getPublisherName() != null) {
-				updatedPublisher.setPublisherName(publisher.getPublisherName());
+	public ResponseEntity<?> updatePublisher(@RequestBody Publisher publisher) {
+		try {
+			if (prepo.existsById(publisher.getPublisherId())) {
+				Publisher updatedPublisher = prepo.findById(publisher.getPublisherId()).get();
+				if (publisher.getPublisherName() != null) {
+					updatedPublisher.setPublisherName(publisher.getPublisherName());
+				}
+	
+				if (publisher.getPublisherAddress() != null) {
+					updatedPublisher.setPublisherAddress(publisher.getPublisherAddress());
+				}
+	
+				if (publisher.getPublisherPhone() != null) {
+					updatedPublisher.setPublisherPhone(publisher.getPublisherPhone());
+				}
+				
+				prepo.save(updatedPublisher);
+				return new ResponseEntity<>(updatedPublisher, HttpStatus.OK);
 			}
-
-			if (publisher.getPublisherAddress() != null) {
-				updatedPublisher.setPublisherAddress(publisher.getPublisherAddress());
-			}
-
-			if (publisher.getPublisherPhone() != null) {
-				updatedPublisher.setPublisherPhone(publisher.getPublisherPhone());
-			}
-			
-			return prepo.save(updatedPublisher);
+			return new ResponseEntity<>("Could not locate publisher.", HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Failed to update publisher", HttpStatus.BAD_REQUEST);
 		}
-		return null;
 	}
 
 	@RequestMapping(value = "/deletePublisher", method = RequestMethod.DELETE, consumes = "application/json")
-	public Publisher deletePublisher(@RequestBody Publisher publisher) {
+	public ResponseEntity<?> deletePublisher(@RequestBody Publisher publisher) {
 		try {
 			prepo.delete(publisher);
-			return publisher;
+			return new ResponseEntity<>(publisher, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return publisher;
+			return new ResponseEntity<>("Failed to delete publisher", HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -191,25 +227,36 @@ public class AdministratorService {
 	}
 
 	@RequestMapping(value = "/addBranch", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Branch addBranch(@RequestBody Branch branch) {
-			return branchRepo.save(branch);
+	public ResponseEntity<?> addBranch(@RequestBody Branch branch) {
+		try {
+			branchRepo.save(branch);
+			return new ResponseEntity<>(branch, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Could not add branch.", HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@RequestMapping(value = "/updateBranch", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Branch updateBranch(@RequestBody Branch branch) {
-		if (branchRepo.existsById(branch.getBranchId())) {
-			Branch updatedBranch = branchRepo.getOne(branch.getBranchId());
-			if (branch.getBranchName() != null) {
-				updatedBranch.setBranchName(branch.getBranchName());
+	public ResponseEntity<?> updateBranch(@RequestBody Branch branch) {
+		try {
+			if (branchRepo.existsById(branch.getBranchId())) {
+				Branch updatedBranch = branchRepo.getOne(branch.getBranchId());
+				if (branch.getBranchName() != null) {
+					updatedBranch.setBranchName(branch.getBranchName());
+				}
+	
+				if (branch.getBranchAddress() != null) {
+					updatedBranch.setBranchAddress(branch.getBranchAddress());
+				}
+				branchRepo.save(updatedBranch);
+				return new ResponseEntity<>(branch, HttpStatus.OK);
 			}
-
-			if (branch.getBranchAddress() != null) {
-				updatedBranch.setBranchAddress(branch.getBranchAddress());
-			}
-			
-			return branchRepo.save(updatedBranch);
+			return new ResponseEntity<>("Could not locate branch.", HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Failed to update branch", HttpStatus.BAD_REQUEST);
 		}
-		return null;
 	}
 
 	@RequestMapping(value = "/deleteBranch", method = RequestMethod.DELETE, consumes = "application/json")
@@ -255,7 +302,8 @@ public class AdministratorService {
 				if (borrower.getPhone() != null) {
 					updatedBorrower.setPhone(borrower.getPhone());
 				}
-				return new ResponseEntity<>(borrowerRepo.save(updatedBorrower), HttpStatus.OK);
+				borrowerRepo.save(updatedBorrower);
+				return new ResponseEntity<>(updatedBorrower, HttpStatus.OK);
 			}
 			return new ResponseEntity<>("Could not locate borrower", HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
