@@ -14,6 +14,8 @@ import com.ss.lms.entity.Book;
 import com.ss.lms.entity.BookCopies;
 import com.ss.lms.entity.Branch;
 import com.ss.lms.repo.BranchRepo;
+import com.ss.lms.repo.BookCopiesRepo;
+import com.ss.lms.repo.BookRepo;
 
 class UpdateBookCopiesRequest {
   private Branch branch;
@@ -43,7 +45,13 @@ class UpdateBookCopiesRequest {
 public class LibrarianService {
   
   @Autowired
+  BookCopiesRepo bookCopiesRepo;
+
+  @Autowired
   BranchRepo branchRepo;
+
+  @Autowired
+  BookRepo bookRepo;
   
   @RequestMapping(value = "/getBooksByBranch", method = RequestMethod.GET, produces = "application/json")
 	public List<Book> getBooksByBranch(@RequestParam Integer branchId) {
@@ -76,9 +84,28 @@ public class LibrarianService {
     Book book = updateBookCopiesRequest.getBook();
     Integer noOfCopies = updateBookCopiesRequest.getNoOfCopies();
 
-    branchRepo.updateNoOfCopies(branch.getBranchId(), book.getBookId(), noOfCopies);
-
-    return branch;
+    try {
+      Book currBook = bookRepo.getOne(book.getBookId());
+      Branch currBranch = branchRepo.getOne(branch.getBranchId());
+      List<Book> branchBooks = currBranch.getBooks();
+      
+      // See if book exists in branch, update it
+      if (branchBooks.contains(currBook)) {
+        branchRepo.updateNoOfCopies(branch.getBranchId(), book.getBookId(), noOfCopies);
+      
+      // Else, add new book with copies to branch
+      } else {
+        BookCopies bookCopies = new BookCopies();
+        bookCopies.setBookId(book.getBookId());
+        bookCopies.setBranchId(branch.getBranchId());
+        bookCopies.setNoOfCopies(noOfCopies);
+        bookCopiesRepo.save(bookCopies);
+      }
+      return branch;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   @RequestMapping(value = "/getNoOfCopies", method = RequestMethod.GET, produces = "application/json")
