@@ -1,13 +1,18 @@
 package com.ss.lms.entity;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "tbl_publisher")
@@ -53,10 +58,22 @@ public class Publisher implements Serializable {
   
   @Column(name = "publisherPhone")
 	private String publisherPhone;
+
+	@OneToMany(fetch = FetchType.LAZY,mappedBy = "publisher")
+	@JsonBackReference
+	private List<Book> books;
 	
 	@Override
 	public String toString() {
 		return publisherName;
+	}
+
+	public List<Book> getBooks() {
+		return books;
+	}
+
+	public void setBooks(List<Book> books) {
+		this.books = books;
 	}
 
 	public Integer getPublisherId() {

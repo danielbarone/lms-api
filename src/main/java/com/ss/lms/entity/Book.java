@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.springframework.lang.NonNull;
@@ -30,8 +31,12 @@ public class Book implements Serializable {
 	@Column(name = "title")
 	@NonNull
 	private String title;
+
+	@ManyToOne
+	@JoinColumn(name = "pubId")
+	Publisher publisher;
 	
-	@ManyToMany(cascade=CascadeType.ALL)
+	@ManyToMany
 	@JoinTable(name = "tbl_book_authors", joinColumns = {@JoinColumn(name="bookId") }, 
 		inverseJoinColumns = {@JoinColumn(name="authorId") } )
 	private List<Author> authors;
@@ -65,6 +70,14 @@ public class Book implements Serializable {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public Publisher getPublisher() {
+		return publisher;
+	}
+
+	public void setPublisher(Publisher publisher) {
+		this.publisher = publisher;
 	}
 
 	public List<Author> getAuthors() {
