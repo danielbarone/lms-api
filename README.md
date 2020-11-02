@@ -101,7 +101,7 @@ port 8080
 
 - - - -
 
-### /getBooksByQuery
+### /getBooksByQuery?searchSting={searchString}
 
 - GET
 
