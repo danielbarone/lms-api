@@ -83,24 +83,120 @@ port 8080
 
 - - - -
 
-### /
+### /addBook
 
-- 
-
-- - - -
-
-### /
-
-- 
+- POST
 
 - - - -
 
-### /
+### /updateBook
 
-- 
+- POST
 
 - - - -
 
-### /
+### /deleteBook
 
-- 
+- DELETE
+
+- - - -
+
+### /getBooksByQuery
+
+- GET
+
+- - - -
+
+### /addGenre
+
+- POST
+
+- - - -
+
+### /updateGenre
+
+- POST
+
+- - - -
+
+### /deleteGenre
+
+- DELETE
+
+- - - -
+
+### /getGenres
+
+- GET
+
+- - - -
+
+### /addPublisher
+
+- POST
+
+- - - -
+
+### /updatePublisher
+
+- POST
+
+- - - -
+
+### /deletePublisher
+
+- DELETE
+
+- - - -
+
+### /getPublishers
+
+- GET
+
+- - - -
+
+### /addBranch
+
+- POST
+
+- - - -
+
+### /updateBranch
+
+- POST
+
+- - - -
+
+### /deleteBranch
+
+- DELETE
+
+- - - -
+
+### /getBranches
+
+- GET
+
+- - - -
+
+### /addBorrower
+
+- POST
+
+- - - -
+
+### /updateBorrower
+
+- POST
+
+- - - -
+
+### /deleteBorrower
+
+- DELETE
+
+- - - -
+
+### /getBorrowers
+
+- GET
