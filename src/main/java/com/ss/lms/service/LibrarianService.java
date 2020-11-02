@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -53,6 +55,13 @@ public class LibrarianService {
   @Autowired
   BookRepo bookRepo;
   
+  @RequestMapping(value = "/getLibBranches", method = RequestMethod.GET, produces = "application/json")
+	public List<Branch> getBranches() {
+		List<Branch> branches = new ArrayList<>();
+		branches = branchRepo.findAll();
+		return branches;
+  }
+
   @RequestMapping(value = "/getBooksByBranch", method = RequestMethod.GET, produces = "application/json")
 	public List<Book> getBooksByBranch(@RequestParam Integer branchId) {
 		List<Book> books = new ArrayList<>();
@@ -62,23 +71,28 @@ public class LibrarianService {
 	}
   
   @RequestMapping(value = "/updateLib", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public Branch updateLib(@RequestBody Branch branch) {
-
-		if (branchRepo.existsById(branch.getBranchId())) {
-			Branch updatedBranch = branchRepo.getOne(branch.getBranchId());
-			if (branch.getBranchName() != null) {
-				updatedBranch.setBranchName(branch.getBranchName());
-			}
-			if (branch.getBranchAddress() != null) {
-				updatedBranch.setBranchAddress(branch.getBranchAddress());
-			}
-			return branchRepo.save(updatedBranch);
-		}
-		return null;
+	public ResponseEntity<?> updateLib(@RequestBody Branch branch) {
+    try {
+      if (branchRepo.existsById(branch.getBranchId())) {
+        Branch updatedBranch = branchRepo.getOne(branch.getBranchId());
+        if (branch.getBranchName() != null) {
+          updatedBranch.setBranchName(branch.getBranchName());
+        }
+        if (branch.getBranchAddress() != null) {
+          updatedBranch.setBranchAddress(branch.getBranchAddress());
+        }
+        return new ResponseEntity<>(branchRepo.save(updatedBranch), HttpStatus.OK);
+      } else {
+        return new ResponseEntity<>("Cannot locate branch", HttpStatus.NOT_FOUND);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      return new ResponseEntity<>("Update library failed.", HttpStatus.BAD_REQUEST);
+    }
   }
 
   @RequestMapping(value = "/updateNoOfCopies", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-  public Branch updateNoOfCopies(@RequestBody UpdateBookCopiesRequest updateBookCopiesRequest) {
+  public ResponseEntity<?> updateNoOfCopies(@RequestBody UpdateBookCopiesRequest updateBookCopiesRequest) {
     
     Branch branch = updateBookCopiesRequest.getBranch();
     Book book = updateBookCopiesRequest.getBook();
@@ -101,10 +115,10 @@ public class LibrarianService {
         bookCopies.setNoOfCopies(noOfCopies);
         bookCopiesRepo.save(bookCopies);
       }
-      return branch;
+      return new ResponseEntity<>("Succesfully updated book copies for this branch.", HttpStatus.OK);
     } catch (Exception e) {
       e.printStackTrace();
-      return null;
+      return new ResponseEntity<>("Failed to update book copies", HttpStatus.BAD_REQUEST);
     }
   }
 
